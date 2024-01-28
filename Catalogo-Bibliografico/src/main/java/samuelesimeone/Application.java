@@ -59,30 +59,12 @@ public class Application {
         PrestitoDAO pd = new PrestitoDAO(em);
 
         System.out.println("Progetto W3");
-
-        List<Biblioteca> bibliotecaList = new ArrayList<>();
-        List<Utente> utenteList = new ArrayList<>();
-
-
-//        for (int i = 0; i < 100; i++) {
-//            generateCatalogo(bibliotecaList);
-//        }
-//        for (int i = 0; i < 50; i++) {
-//            utenteList.add(generatoreUser.get());
-//        }
-//
-////        for (Biblioteca element: bibliotecaList){
-////            ed.saveDb(element);
-////        }
-//        for (Utente user : utenteList){
-//            ud.saveDb(user);
-//        }
-
+        System.out.println("Consiglio al primo avvio usare comando 12");
 
 
 
         System.out.println("********************************** Benvenuto ************************************");
-            System.out.println("Che azioni vuoi fare nel catalogo? "+ "\n" + "(1-Aggiungi, 2-Cancellazione, 3-Ricerca ISBN, 4-Ricerca Data, 5-Ricerca Autore, 6-Ricerca Titolo, 7-Crea Prestito, 8-Cerca Prestiti, 9-Prestiti Scaduti, 10-Vedi Catalogo, 11-Restituzione, 0-Esci)");
+            System.out.println("Che azioni vuoi fare nel catalogo? "+ "\n" + "(1-Aggiungi, 2-Cancellazione, 3-Ricerca ISBN, 4-Ricerca Data, 5-Ricerca Autore, 6-Ricerca Titolo,"+ "\n" +" 7-Crea Prestito, 8-Cerca Prestiti, 9-Prestiti Scaduti, 10-Vedi Catalogo, 11-Restituzione, 12-Genera DB ,0-Esci)");
             cmd = input.nextInt();
             switch (cmd){
                 case 1: {
@@ -128,6 +110,10 @@ public class Application {
                 }
                 case 11:{
                     restitutionPrestito(pd);
+                    break;
+                }
+                case 12:{
+                    generateDataBase(ed, ud, pd);
                     break;
                 }
                 default:{
@@ -266,6 +252,28 @@ public class Application {
         }
     }
 
+    public static void generatePrestitoAuto(PrestitoDAO x, UtenteDAO y, BibliotecaDao z){
+        try{
+            long input = rdm.nextLong(101, 150);
+            Utente u = y.getById(input);
+            if (u != null){
+                input = rdm.nextLong(1, 100);
+                Biblioteca b = z.getById(input);
+                if (b != null ){
+                    if (x.getElement(input).size() == 0){
+                        LocalDate data = LocalDate.now();
+                        Prestito p = new Prestito(u,b,data,data.plusDays(30));
+                        x.saveDb(p);
+                    }else {
+                        System.out.println("Non puoi prendere questo elemento");
+                    }
+                }
+            }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+
     public static void checkPrestito(PrestitoDAO x){
         System.out.println("Inserire numero tessera");
         Scanner scanner = new Scanner(System.in);
@@ -307,6 +315,20 @@ public class Application {
     public static void printCatalogo(BibliotecaDao x){
         System.out.println("********************* Catalogo Completo ********************");
         x.printCatalog().forEach(System.out::println);
+    }
+
+    public static void generateDataBase(BibliotecaDao x, UtenteDAO y, PrestitoDAO z){
+        List<Biblioteca> bibliotecaList = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            generateCatalogo(bibliotecaList);
+        }
+        bibliotecaList.forEach(x::saveDb);
+        for (int i = 0; i < 50; i++) {
+            y.saveDb(generatoreUser.get());
+        }
+        for (int i = 0; i < rdm.nextInt(1,50); i++) {
+            generatePrestitoAuto(z, y, x);
+        }
     }
 
 }
